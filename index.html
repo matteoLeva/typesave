@@ -1190,6 +1190,69 @@
     const userLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
     if (userLang.startsWith('it')) applyTranslations('it');
 
+    // ─── Success page (post-Stripe redirect) ───
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('purchased')) return;
+      const sessionId = params.get('session_id');
+      if (!sessionId) return;
+
+      // Build modal
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,8,12,0.92);backdrop-filter:blur(12px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;';
+      overlay.innerHTML = `
+        <div style="background:#181B26;border:1px solid #22263A;border-radius:20px;padding:48px 40px;max-width:520px;width:100%;text-align:center;box-shadow:0 40px 120px rgba(0,0,0,0.6);">
+          <div style="font-size:48px;margin-bottom:20px;">🎉</div>
+          <h2 style="font-family:'Cormorant',serif;font-size:32px;color:#EDE9E1;margin:0 0 10px;font-weight:400;">Thank you!</h2>
+          <p style="color:#9B9898;font-size:15px;margin:0 0 32px;line-height:1.65;" id="success-sub">Retrieving your license key...</p>
+          <div id="key-box" style="display:none;background:#06080C;border:2px dashed #2C3148;border-radius:12px;padding:24px;margin-bottom:28px;">
+            <p style="font-family:'DM Mono',monospace;font-size:11px;color:#525566;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px;">Your License Key</p>
+            <code id="license-key" style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:#EDE9E1;letter-spacing:0.04em;word-break:break-all;"></code>
+          </div>
+          <button id="copy-btn" style="display:none;background:#FFB800;color:#000;border:none;border-radius:8px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-bottom:12px;" onclick="copyKey()">Copy License Key</button>
+          <p style="color:#525566;font-size:12px;margin:0;" id="key-hint" style="display:none;"></p>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      window.copyKey = function () {
+        const key = document.getElementById('license-key').textContent;
+        navigator.clipboard.writeText(key).then(() => {
+          document.getElementById('copy-btn').textContent = '✓ Copied!';
+          setTimeout(() => document.getElementById('copy-btn').textContent = 'Copy License Key', 2000);
+        });
+      };
+
+      function showKey(key) {
+        document.getElementById('success-sub').textContent = 'Save this key — you\'ll need it to activate TypeSave.';
+        document.getElementById('license-key').textContent = key;
+        document.getElementById('key-box').style.display = 'block';
+        document.getElementById('copy-btn').style.display = 'block';
+        document.getElementById('key-hint').textContent = 'This key is also saved — contact support if you lose it.';
+        document.getElementById('key-hint').style.display = 'block';
+      }
+
+      function showError() {
+        document.getElementById('success-sub').textContent = 'Your payment was successful! Check your email for the license key, or contact support.';
+      }
+
+      // Poll the API (webhook may take a few seconds)
+      let attempts = 0;
+      async function fetchKey() {
+        try {
+          const res = await fetch('https://api.sssuperfast.com/api/license?session_id=' + sessionId);
+          const data = await res.json();
+          if (data.key) { showKey(data.key); return; }
+          if (data.status === 'processing' && attempts < 8) {
+            attempts++;
+            setTimeout(fetchKey, 2000);
+          } else {
+            showError();
+          }
+        } catch { showError(); }
+      }
+      fetchKey();
+    })();
+
     // ─── Nav scroll effect ───
     const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
