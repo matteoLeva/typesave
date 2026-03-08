@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TypeSave — Never Lose Your Typing Again</title>
-  <meta name="description" content="TypeSave automatically saves everything you type on macOS. Privacy-first, AES-256 encrypted, stored locally. Free and open source." />
-  <meta property="og:title" content="TypeSave — Never Lose Your Typing Again" />
-  <meta property="og:description" content="A macOS utility that automatically saves everything you type. Local-only, encrypted, open source." />
+  <title data-i18n="meta.title">TypeSave — Never Lose Your Typing Again</title>
+  <meta name="description" data-i18n-attr="content" data-i18n="meta.desc" content="TypeSave automatically saves everything you type on macOS. Privacy-first, AES-256 encrypted, stored locally. Free and open source." />
+  <meta property="og:title" data-i18n-attr="content" data-i18n="meta.title" content="TypeSave — Never Lose Your Typing Again" />
+  <meta property="og:description" data-i18n-attr="content" data-i18n="meta.desc" content="A macOS utility that automatically saves everything you type. Local-only, encrypted, open source." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -844,18 +844,18 @@
 
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      Free & Open Source &nbsp;·&nbsp; macOS 13.0+
+      <span data-i18n="hero.badge">Free & Open Source &nbsp;·&nbsp; macOS 13.0+</span>
     </div>
 
-    <h1>Never Lose Your<br /><em>Typing</em> Again</h1>
+    <h1><span data-i18n="hero.h1a">Never Lose Your</span><br /><em data-i18n="hero.h1b">Typing</em> <span data-i18n="hero.h1c">Again</span></h1>
 
-    <p class="hero-sub">
+    <p class="hero-sub" data-i18n="hero.sub">
       TypeSave silently captures everything you write—across every app—so you can recover lost work in seconds.
     </p>
 
     <div class="hero-actions">
-      <a href="#download" class="btn-primary">↓ Download for macOS</a>
-      <a href="https://github.com/matteoLeva/typesave" class="btn-secondary">★ View on GitHub</a>
+      <a href="#download" class="btn-primary" data-i18n="hero.cta1">↓ Download for macOS</a>
+      <a href="https://github.com/matteoLeva/typesave" class="btn-secondary" data-i18n="hero.cta2">★ View on GitHub</a>
     </div>
 
     <!-- App Window Demo -->
@@ -873,15 +873,15 @@
       </div>
 
       <div class="window-body">
-        <div class="demo-app-label">→ Notes.app — active window</div>
+        <div class="demo-app-label" data-i18n="demo.label">→ Notes.app — active window</div>
 
         <div class="demo-typing-area">
           <span id="typing-text"></span><span class="typing-cursor"></span>
         </div>
 
         <div class="demo-bar">
-          <span class="demo-bar-label">Recent captures</span>
-          <span class="saved-badge" id="saved-badge">✓ Saved</span>
+          <span class="demo-bar-label" data-i18n="demo.recent">Recent captures</span>
+          <span class="saved-badge" id="saved-badge" data-i18n="demo.saved">✓ Saved</span>
         </div>
 
         <div class="demo-entries" id="demo-entries">
@@ -918,19 +918,19 @@
   <div class="stats-bar reveal">
     <div class="stat-item">
       <div class="stat-value">0 bytes</div>
-      <div class="stat-label">Sent to cloud</div>
+      <div class="stat-label" data-i18n="stats.cloud">Sent to cloud</div>
     </div>
     <div class="stat-item">
       <div class="stat-value">AES-256</div>
-      <div class="stat-label">Encryption</div>
+      <div class="stat-label" data-i18n="stats.enc">Encryption</div>
     </div>
     <div class="stat-item">
       <div class="stat-value">&lt;1 MB</div>
-      <div class="stat-label">RAM usage</div>
+      <div class="stat-label" data-i18n="stats.ram">RAM usage</div>
     </div>
     <div class="stat-item">
       <div class="stat-value">30 days</div>
-      <div class="stat-label">Auto-delete</div>
+      <div class="stat-label" data-i18n="stats.del">Auto-delete</div>
     </div>
   </div>
 
@@ -938,30 +938,30 @@
   <section class="features" id="features">
     <div class="container">
       <div class="features-header reveal">
-        <div class="section-label">Features</div>
-        <h2 class="section-title">Everything you need.<br />Nothing you don't.</h2>
+        <div class="section-label" data-i18n="features.label">Features</div>
+        <h2 class="section-title" data-i18n="features.title">Everything you need.<br />Nothing you don't.</h2>
       </div>
 
       <div class="features-grid reveal">
         <div class="feature-card">
           <div class="feature-icon">🔐</div>
-          <div class="feature-title">Privacy First</div>
-          <p class="feature-desc">All data is encrypted with AES-256-GCM via Apple's CryptoKit and stored exclusively on your Mac. No cloud. No accounts. No network access.</p>
+          <div class="feature-title" data-i18n="f1.title">Privacy First</div>
+          <p class="feature-desc" data-i18n="f1.desc">All data is encrypted with AES-256-GCM via Apple's CryptoKit and stored exclusively on your Mac. No cloud. No accounts. No network access.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">✨</div>
-          <div class="feature-title">Automatic Capture</div>
-          <p class="feature-desc">Runs silently in the background using macOS Accessibility API. Captures across every app—Notes, Mail, Slack, browsers, IDEs, and more.</p>
+          <div class="feature-title" data-i18n="f2.title">Automatic Capture</div>
+          <p class="feature-desc" data-i18n="f2.desc">Runs silently in the background using macOS Accessibility API. Captures across every app—Notes, Mail, Slack, browsers, IDEs, and more.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
-          <div class="feature-title">Instant Search</div>
-          <p class="feature-desc">Full-text search across your entire history. Find that email draft you closed, that form you lost, that message you accidentally deleted.</p>
+          <div class="feature-title" data-i18n="f3.title">Instant Search</div>
+          <p class="feature-desc" data-i18n="f3.desc">Full-text search across your entire history. Find that email draft you closed, that form you lost, that message you accidentally deleted.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🪶</div>
-          <div class="feature-title">Featherlight</div>
-          <p class="feature-desc">Under 1 MB RAM. Near-zero CPU. Native SwiftUI + AppKit—no Electron, no web views. Built to disappear completely into the background.</p>
+          <div class="feature-title" data-i18n="f4.title">Featherlight</div>
+          <p class="feature-desc" data-i18n="f4.desc">Under 1 MB RAM. Near-zero CPU. Native SwiftUI + AppKit—no Electron, no web views. Built to disappear completely into the background.</p>
         </div>
       </div>
     </div>
@@ -971,25 +971,25 @@
   <section class="how-it-works" id="how-it-works">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">How It Works</div>
-        <h2 class="section-title">Up and running<br />in 60 seconds.</h2>
+        <div class="section-label" data-i18n="how.label">How It Works</div>
+        <h2 class="section-title" data-i18n="how.title">Up and running<br />in 60 seconds.</h2>
       </div>
 
       <div class="steps">
         <div class="step reveal">
           <div class="step-num active">01</div>
-          <h3 class="step-title">Install &amp; Allow</h3>
-          <p class="step-desc">Download the app and grant Accessibility permissions in System Settings. One-time setup, takes about 30 seconds.</p>
+          <h3 class="step-title" data-i18n="s1.title">Install &amp; Allow</h3>
+          <p class="step-desc" data-i18n="s1.desc">Download the app and grant Accessibility permissions in System Settings. One-time setup, takes about 30 seconds.</p>
         </div>
         <div class="step reveal reveal-delay-1">
           <div class="step-num">02</div>
-          <h3 class="step-title">Type Normally</h3>
-          <p class="step-desc">Use your Mac exactly as you always do. TypeSave runs invisibly in the background—zero interruption to your workflow.</p>
+          <h3 class="step-title" data-i18n="s2.title">Type Normally</h3>
+          <p class="step-desc" data-i18n="s2.desc">Use your Mac exactly as you always do. TypeSave runs invisibly in the background—zero interruption to your workflow.</p>
         </div>
         <div class="step reveal reveal-delay-2">
           <div class="step-num">03</div>
-          <h3 class="step-title">Recover Instantly</h3>
-          <p class="step-desc">Lost something? Click the menu bar icon, search your history, copy your text back. Done in seconds—not frustration.</p>
+          <h3 class="step-title" data-i18n="s3.title">Recover Instantly</h3>
+          <p class="step-desc" data-i18n="s3.desc">Lost something? Click the menu bar icon, search your history, copy your text back. Done in seconds—not frustration.</p>
         </div>
       </div>
     </div>
@@ -999,8 +999,8 @@
   <section class="privacy" id="privacy">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">Privacy</div>
-        <h2 class="section-title">Your words.<br />Your machine.<br />Full stop.</h2>
+        <div class="section-label" data-i18n="priv.label">Privacy</div>
+        <h2 class="section-title" data-i18n="priv.title">Your words.<br />Your machine.<br />Full stop.</h2>
       </div>
 
       <div class="privacy-layout">
@@ -1008,37 +1008,37 @@
           <div class="privacy-item reveal">
             <div class="privacy-item-icon">🔒</div>
             <div>
-              <div class="privacy-item-title">AES-256-GCM Encryption</div>
-              <div class="privacy-item-desc">Every capture is encrypted via Apple's CryptoKit before being written to disk. The key never leaves your device—not even to us.</div>
+              <div class="privacy-item-title" data-i18n="p1.title">AES-256-GCM Encryption</div>
+              <div class="privacy-item-desc" data-i18n="p1.desc">Every capture is encrypted via Apple's CryptoKit before being written to disk. The key never leaves your device—not even to us.</div>
             </div>
           </div>
           <div class="privacy-item reveal reveal-delay-1">
             <div class="privacy-item-icon">🚫</div>
             <div>
-              <div class="privacy-item-title">Zero Network Access</div>
-              <div class="privacy-item-desc">No analytics, no telemetry, no cloud sync. TypeSave holds no network entitlements—verify it yourself in Little Snitch.</div>
+              <div class="privacy-item-title" data-i18n="p2.title">Zero Network Access</div>
+              <div class="privacy-item-desc" data-i18n="p2.desc">No analytics, no telemetry, no cloud sync. TypeSave holds no network entitlements—verify it yourself in Little Snitch.</div>
             </div>
           </div>
           <div class="privacy-item reveal reveal-delay-2">
             <div class="privacy-item-icon">🗑️</div>
             <div>
-              <div class="privacy-item-title">Auto-Delete After 30 Days</div>
-              <div class="privacy-item-desc">All data is permanently deleted after 30 days by default. Fully configurable. Your typing history doesn't outlast its usefulness.</div>
+              <div class="privacy-item-title" data-i18n="p3.title">Auto-Delete After 30 Days</div>
+              <div class="privacy-item-desc" data-i18n="p3.desc">All data is permanently deleted after 30 days by default. Fully configurable. Your typing history doesn't outlast its usefulness.</div>
             </div>
           </div>
           <div class="privacy-item reveal reveal-delay-3">
             <div class="privacy-item-icon">📂</div>
             <div>
-              <div class="privacy-item-title">Open Source &amp; Auditable</div>
-              <div class="privacy-item-desc">Every line of source code is public on GitHub under the MIT License. Audit it, fork it, build it yourself. No black boxes.</div>
+              <div class="privacy-item-title" data-i18n="p4.title">Open Source &amp; Auditable</div>
+              <div class="privacy-item-desc" data-i18n="p4.desc">Every line of source code is public on GitHub under the MIT License. Audit it, fork it, build it yourself. No black boxes.</div>
             </div>
           </div>
         </div>
 
         <div class="privacy-panel reveal">
           <span class="shield-icon">🛡️</span>
-          <div class="privacy-headline">Zero-Knowledge Architecture</div>
-          <p class="privacy-tagline">We can't read your data. Not because of policy—because of math.</p>
+          <div class="privacy-headline" data-i18n="priv.panel.title">Zero-Knowledge Architecture</div>
+          <p class="privacy-tagline" data-i18n="priv.panel.sub">We can't read your data. Not because of policy—because of math.</p>
           <div class="privacy-tags">
             <span class="privacy-tag">local-only</span>
             <span class="privacy-tag">aes-256-gcm</span>
@@ -1056,18 +1056,18 @@
   <!-- ══════════ DOWNLOAD ══════════ -->
   <section class="download-section" id="download">
     <div class="download-inner">
-      <div class="section-label">Download</div>
-      <h2 class="section-title reveal">Start saving your<br />typing today.</h2>
-      <p class="download-sub reveal">Free, open source, and always will be.</p>
+      <div class="section-label" data-i18n="dl.label">Download</div>
+      <h2 class="section-title reveal" data-i18n="dl.title">Start saving your<br />typing today.</h2>
+      <p class="download-sub reveal" data-i18n="dl.sub">Free, open source, and always will be.</p>
       <div class="download-actions reveal">
-        <a href="https://github.com/matteoLeva/typesave/releases/latest/download/TypeSave.zip" class="btn-primary">
+        <a href="https://github.com/matteoLeva/typesave/releases/latest/download/TypeSave.zip" class="btn-primary" data-i18n="hero.cta1">
           ↓ Download for macOS
         </a>
-        <a href="https://github.com/matteoLeva/typesave" class="btn-secondary">
+        <a href="https://github.com/matteoLeva/typesave" class="btn-secondary" data-i18n="hero.cta2">
           View on GitHub ↗
         </a>
       </div>
-      <p class="sysreq reveal">
+      <p class="sysreq reveal" data-i18n="dl.sysreq">
         Requires macOS 13.0 Ventura or later<br />
         Apple Silicon (M1+) and Intel · ~4 MB
       </p>
@@ -1089,6 +1089,107 @@
   </footer>
 
   <script>
+    // ─── i18n ───
+    const translations = {
+      it: {
+        "meta.title":       "TypeSave — Non Perdere Mai Più Quello che Scrivi",
+        "meta.desc":        "TypeSave salva automaticamente tutto ciò che digiti su macOS. Privacy totale, crittografia AES-256, dati solo in locale. Gratis e open source.",
+        "hero.badge":       "Gratis & Open Source \u00a0·\u00a0 macOS 13.0+",
+        "hero.h1a":         "Non Perdere Mai Più",
+        "hero.h1b":         "Ciò che Scrivi",
+        "hero.h1c":         "",
+        "hero.sub":         "TypeSave cattura silenziosamente tutto quello che scrivi — in ogni app — così puoi recuperare il lavoro perso in pochi secondi.",
+        "hero.cta1":        "↓ Scarica per macOS",
+        "hero.cta2":        "★ Vedi su GitHub",
+        "demo.label":       "→ Note.app — finestra attiva",
+        "demo.recent":      "Catture recenti",
+        "demo.saved":       "✓ Salvato",
+        "stats.cloud":      "Inviato al cloud",
+        "stats.enc":        "Crittografia",
+        "stats.ram":        "Uso RAM",
+        "stats.del":        "Auto-eliminazione",
+        "features.label":   "Funzionalità",
+        "features.title":   "Tutto quello che ti serve.<br />Nient'altro.",
+        "f1.title":         "Privacy al Primo Posto",
+        "f1.desc":          "Tutti i dati sono crittografati con AES-256-GCM tramite CryptoKit di Apple e salvati esclusivamente sul tuo Mac. Nessun cloud. Nessun account. Nessun accesso alla rete.",
+        "f2.title":         "Cattura Automatica",
+        "f2.desc":          "Funziona silenziosamente in background tramite le API di Accessibilità di macOS. Cattura in ogni app: Note, Mail, Slack, browser, IDE e molto altro.",
+        "f3.title":         "Ricerca Istantanea",
+        "f3.desc":          "Ricerca full-text su tutta la cronologia. Ritrova quella bozza email che hai chiuso per sbaglio, quel modulo perso, quel messaggio eliminato.",
+        "f4.title":         "Leggerissima",
+        "f4.desc":          "Meno di 1 MB di RAM. CPU quasi a zero. SwiftUI + AppKit nativo — niente Electron, niente web view. Progettata per sparire completamente in background.",
+        "how.label":        "Come Funziona",
+        "how.title":        "Pronta in<br />60 secondi.",
+        "s1.title":         "Installa & Autorizza",
+        "s1.desc":          "Scarica l'app e concedi i permessi di Accessibilità nelle Impostazioni di Sistema. Setup una-tantum, richiede circa 30 secondi.",
+        "s2.title":         "Scrivi Normalmente",
+        "s2.desc":          "Usa il tuo Mac esattamente come fai sempre. TypeSave lavora invisibilmente in background — zero interruzioni al tuo flusso.",
+        "s3.title":         "Recupera all'Istante",
+        "s3.desc":          "Hai perso qualcosa? Clicca sull'icona nella barra dei menu, cerca nella cronologia, copia il testo. Fatto in pochi secondi.",
+        "priv.label":       "Privacy",
+        "priv.title":       "Le tue parole.<br />Il tuo Mac.<br />Punto.",
+        "p1.title":         "Crittografia AES-256-GCM",
+        "p1.desc":          "Ogni cattura viene crittografata tramite CryptoKit di Apple prima di essere scritta su disco. La chiave non lascia mai il tuo dispositivo — nemmeno a noi.",
+        "p2.title":         "Nessun Accesso alla Rete",
+        "p2.desc":          "Nessuna analisi, nessuna telemetria, nessuna sincronizzazione cloud. TypeSave non ha permessi di rete — verificalo tu stesso con Little Snitch.",
+        "p3.title":         "Auto-eliminazione dopo 30 Giorni",
+        "p3.desc":          "Tutti i dati vengono eliminati definitivamente dopo 30 giorni per impostazione predefinita. Configurabile. La tua cronologia non sopravvive alla sua utilità.",
+        "p4.title":         "Open Source & Verificabile",
+        "p4.desc":          "Ogni riga del codice sorgente è pubblica su GitHub con licenza MIT. Analizzalo, forkalo, compilalo tu stesso. Nessuna scatola nera.",
+        "priv.panel.title": "Architettura Zero-Knowledge",
+        "priv.panel.sub":   "Non possiamo leggere i tuoi dati. Non per scelta — per matematica.",
+        "dl.label":         "Download",
+        "dl.title":         "Inizia a salvare<br />i tuoi testi oggi.",
+        "dl.sub":           "Gratis, open source, e sempre lo sarà.",
+        "dl.sysreq":        "Richiede macOS 13.0 Ventura o successivo<br />Apple Silicon (M1+) e Intel · ~4 MB",
+      }
+    };
+
+    function applyTranslations(lang) {
+      const t = translations[lang];
+      if (!t) return;
+      document.getElementById('html-root').lang = lang;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (!t[key]) return;
+        // For elements where we need innerHTML (e.g. <br>)
+        if (t[key].includes('<br>') || t[key].includes('<br />')) {
+          el.innerHTML = t[key];
+        } else {
+          el.textContent = t[key];
+        }
+      });
+
+      // Handle h1 specially — three spans but the third is empty in IT
+      const h1a = document.querySelector('[data-i18n="hero.h1a"]');
+      const h1b = document.querySelector('[data-i18n="hero.h1b"]');
+      const h1c = document.querySelector('[data-i18n="hero.h1c"]');
+      if (h1a) h1a.textContent = t['hero.h1a'] || '';
+      if (h1b) h1b.textContent = t['hero.h1b'] || '';
+      if (h1c) h1c.textContent = t['hero.h1c'] || '';
+
+      // Meta attrs
+      document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+        const key = el.dataset.i18n;
+        const attr = el.dataset.i18nAttr;
+        if (t[key] && attr) el.setAttribute(attr, t[key]);
+      });
+
+      // Swap typing phrases
+      if (lang === 'it') {
+        window.__i18nPhrases = [
+          "Gentile responsabile, desidero candidarmi con grande entusiasmo per...",
+          "Nota veloce prima di dimenticare — l'idea principale era che...",
+          "Appunti riunione: revisione Q1. Ricavi su del 23%, churn al 2.1%...",
+          "Ciao Sara, ti scrivo per il preventivo che ti ho mandato la settimana scorsa...",
+        ];
+      }
+    }
+
+    const userLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+    if (userLang.startsWith('it')) applyTranslations('it');
+
     // ─── Nav scroll effect ───
     const nav = document.getElementById('nav');
     window.addEventListener('scroll', () => {
@@ -1108,7 +1209,7 @@
     revealEls.forEach(el => revealObserver.observe(el));
 
     // ─── Typing animation ───
-    const phrases = [
+    const phrases = window.__i18nPhrases || [
       "Dear hiring manager, I am writing to express my enthusiastic interest in...",
       "Quick note before I forget — the main insight from today's standup was that...",
       "Meeting notes: Q1 review. Revenue up 23%, churn down to 2.1%. Key decisions...",
