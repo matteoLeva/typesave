@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TypeSave — Never Lose Your Typing Again</title>
+  <meta name="description" content="TypeSave automatically saves everything you type on macOS. Privacy-first, AES-256 encrypted, stored locally. Free and open source." />
+  <meta property="og:title" content="TypeSave — Never Lose Your Typing Again" />
+  <meta property="og:description" content="A macOS utility that automatically saves everything you type. Local-only, encrypted, open source." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── RESET ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:        #06080C;
+      --bg-2:      #0C0F17;
+      --bg-3:      #12151F;
+      --surface:   #181B26;
+      --surface-2: #1E2230;
+      --border:    #22263A;
+      --border-2:  #2C3148;
+
+      --text:      #EDE9E1;
+      --text-2:    #9B9898;
+      --text-3:    #525566;
+
+      --accent:        #FFB800;
+      --accent-hover:  #FFC933;
+      --accent-dim:    #CC9300;
+      --accent-glow:   rgba(255,184,0,0.18);
+      --accent-subtle: rgba(255,184,0,0.07);
+      --accent-border: rgba(255,184,0,0.22);
+
+      --green:         #34D399;
+      --green-bg:      rgba(52,211,153,0.08);
+      --green-border:  rgba(52,211,153,0.2);
+
+      --font-display: 'Cormorant', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --font-mono:    'DM Mono', 'Fira Code', monospace;
+
+      --r:    10px;
+      --r-lg: 18px;
+      --r-xl: 24px;
+
+      --shadow-card: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+      --shadow-hero: 0 48px 140px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 400; }
+
+    /* ─── UTILITIES ─── */
+    .container { max-width: 1080px; margin: 0 auto; }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: clamp(38px, 5.5vw, 68px);
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      color: var(--text);
+    }
+
+    /* ─── REVEAL ANIMATIONS ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.7); }
+    }
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateX(-6px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 36px;
+      background: rgba(6,8,12,0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    nav.scrolled { border-bottom-color: var(--border); }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .nav-logo-mark {
+      width: 30px; height: 30px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      color: #000;
+      flex-shrink: 0;
+    }
+    .nav-logo-text {
+      font-family: var(--font-mono);
+      font-size: 14.5px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-link {
+      padding: 7px 14px;
+      font-size: 13.5px;
+      color: var(--text-3);
+      border-radius: 7px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--text-2); background: rgba(255,255,255,0.04); }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: var(--accent);
+      color: #000;
+      font-size: 13.5px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      border-radius: 7px;
+      margin-left: 8px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 36px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient glow */
+    .hero-glow {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(255,184,0,0.065) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent-border);
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.05s forwards;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    .hero h1 {
+      font-size: clamp(60px, 9vw, 118px);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      max-width: 880px;
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.18s forwards;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 1.8vw, 18.5px);
+      color: var(--text-2);
+      font-weight: 300;
+      max-width: 480px;
+      line-height: 1.75;
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.32s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 72px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.46s forwards;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #000;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      border-radius: var(--r);
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(255,184,0,0.28);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      background: transparent;
+      color: var(--text-2);
+      font-size: 15px;
+      font-weight: 400;
+      font-family: var(--font-body);
+      border-radius: var(--r);
+      border: 1px solid var(--border-2);
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--text-3);
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* ─── HERO DEMO WINDOW ─── */
+    .hero-window {
+      width: 100%;
+      max-width: 680px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-hero);
+      text-align: left;
+      position: relative;
+      opacity: 0;
+      animation: fadeUp 0.85s ease 0.6s forwards;
+    }
+
+    .window-titlebar {
+      display: flex;
+      align-items: center;
+      padding: 13px 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+    .window-dots { display: flex; gap: 7px; }
+    .window-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red    { background: #FF5F57; }
+    .dot-yellow { background: #FEBC2E; }
+    .dot-green  { background: #28C840; }
+
+    .window-title {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-3);
+    }
+    .window-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--green);
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    .window-body { padding: 22px 24px; }
+
+    .demo-app-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+
+    .demo-typing-area {
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      min-height: 72px;
+      font-size: 14.5px;
+      color: var(--text);
+      line-height: 1.65;
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 17px;
+      background: var(--accent);
+      margin-left: 1px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    .demo-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .demo-bar-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-3);
+    }
+    .saved-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--green);
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: 5px;
+      padding: 3px 9px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .saved-badge.show { opacity: 1; }
+
+    .demo-entries { display: flex; flex-direction: column; gap: 7px; }
+
+    .demo-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 10px 13px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s;
+    }
+    .demo-entry.show { opacity: 1; transform: translateY(0); }
+    .demo-entry:hover { background: var(--bg-3); }
+
+    .entry-icon {
+      width: 28px; height: 28px;
+      background: var(--accent-subtle);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .entry-body { flex: 1; min-width: 0; }
+    .entry-app {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-3);
+      margin-bottom: 2px;
+    }
+    .entry-text {
+      font-size: 12.5px;
+      color: var(--text-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .entry-time {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-3);
+      flex-shrink: 0;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      background: var(--bg-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 36px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 0 52px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4vw, 52px);
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 7px;
+      letter-spacing: -0.02em;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── SECTIONS ─── */
+    section { padding: 108px 36px; }
+
+    /* ─── FEATURES ─── */
+    .features { background: var(--bg); }
+
+    .features-header {
+      max-width: 560px;
+      margin-bottom: 60px;
+    }
+    .features-header .section-title { margin-top: 14px; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+    }
+    .feature-card {
+      background: var(--bg);
+      padding: 44px 40px;
+      transition: background 0.25s ease;
+      position: relative;
+    }
+    .feature-card:hover { background: var(--surface); }
+
+    .feature-icon {
+      width: 46px; height: 46px;
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent-border);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 22px;
+    }
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 11px;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .feature-desc {
+      font-size: 14.5px;
+      color: var(--text-2);
+      line-height: 1.75;
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-it-works { background: var(--bg-2); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 64px;
+      position: relative;
+    }
+
+    /* Connecting line */
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 52px;
+      left: calc(33.33% / 2);
+      right: calc(33.33% / 2);
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-2), var(--border-2), transparent);
+    }
+
+    .step { padding: 0 40px 0 0; }
+    .step:last-child { padding-right: 0; }
+
+    .step-num {
+      width: 40px; height: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-3);
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-num.active {
+      background: var(--accent-subtle);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .step-desc {
+      font-size: 14.5px;
+      color: var(--text-2);
+      line-height: 1.75;
+    }
+
+    /* ─── PRIVACY ─── */
+    .privacy { background: var(--bg); }
+
+    .privacy-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 72px;
+      align-items: start;
+      margin-top: 64px;
+    }
+
+    .privacy-items { display: flex; flex-direction: column; gap: 12px; }
+
+    .privacy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 22px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .privacy-item:hover {
+      border-color: var(--border-2);
+      background: var(--surface-2);
+    }
+    .privacy-item-icon {
+      width: 34px; height: 34px;
+      background: var(--accent-subtle);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .privacy-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .privacy-item-desc {
+      font-size: 13.5px;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    .privacy-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 40px 36px;
+      text-align: center;
+      position: sticky;
+      top: 80px;
+    }
+    .shield-icon {
+      font-size: 64px;
+      line-height: 1;
+      margin-bottom: 22px;
+      display: block;
+    }
+    .privacy-headline {
+      font-family: var(--font-display);
+      font-size: 30px;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .privacy-tagline {
+      font-size: 13.5px;
+      color: var(--text-2);
+      line-height: 1.65;
+      margin-bottom: 30px;
+    }
+
+    .privacy-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: center;
+    }
+    .privacy-tag {
+      padding: 5px 13px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-3);
+    }
+
+    /* ─── DOWNLOAD ─── */
+    .download-section {
+      background: var(--bg-2);
+      text-align: center;
+    }
+
+    .download-inner {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+    .download-section .section-title { margin: 14px 0 18px; }
+    .download-sub {
+      font-size: 16px;
+      color: var(--text-2);
+      font-weight: 300;
+      line-height: 1.75;
+      margin-bottom: 48px;
+    }
+    .download-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .sysreq {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-3);
+      line-height: 1.8;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 40px 36px;
+    }
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-logo {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      color: var(--text-3);
+    }
+    .footer-links { display: flex; gap: 6px; }
+    .footer-link {
+      padding: 6px 12px;
+      font-size: 13px;
+      color: var(--text-3);
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .footer-link:hover { color: var(--text-2); background: rgba(255,255,255,0.04); }
+    .footer-made {
+      font-size: 13px;
+      color: var(--text-3);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      nav { padding: 0 20px; }
+      .nav-link { display: none; }
+
+      section { padding: 72px 20px; }
+      .hero { padding: 100px 20px 60px; }
+
+      .features-grid { grid-template-columns: 1fr; }
+
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .steps::before { display: none; }
+      .step { padding: 0; }
+
+      .privacy-layout { grid-template-columns: 1fr; }
+      .privacy-panel { position: static; }
+
+      .stats-bar { gap: 0; }
+      .stat-item {
+        padding: 20px 24px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        width: 50%;
+      }
+      .stat-item:nth-last-child(-n+2) { border-bottom: none; }
+
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ NAV ══════════ -->
+  <nav id="nav">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">⌨</div>
+      <span class="nav-logo-text">TypeSave</span>
+    </a>
+    <div class="nav-right">
+      <a href="#features"     class="nav-link">Features</a>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#privacy"      class="nav-link">Privacy</a>
+      <a href="https://github.com/matteoLeva/typesave" class="nav-link">GitHub ↗</a>
+      <a href="#download" class="nav-btn">↓ Download</a>
+    </div>
+  </nav>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Free & Open Source &nbsp;·&nbsp; macOS 13.0+
+    </div>
+
+    <h1>Never Lose Your<br /><em>Typing</em> Again</h1>
+
+    <p class="hero-sub">
+      TypeSave silently captures everything you write—across every app—so you can recover lost work in seconds.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#download" class="btn-primary">↓ Download for macOS</a>
+      <a href="https://github.com/matteoLeva/typesave" class="btn-secondary">★ View on GitHub</a>
+    </div>
+
+    <!-- App Window Demo -->
+    <div class="hero-window">
+      <div class="window-titlebar">
+        <div class="window-dots">
+          <div class="window-dot dot-red"></div>
+          <div class="window-dot dot-yellow"></div>
+          <div class="window-dot dot-green"></div>
+        </div>
+        <div class="window-title">TypeSave — Dashboard</div>
+        <div class="window-status">
+          <div class="status-dot"></div> Capturing
+        </div>
+      </div>
+
+      <div class="window-body">
+        <div class="demo-app-label">→ Notes.app — active window</div>
+
+        <div class="demo-typing-area">
+          <span id="typing-text"></span><span class="typing-cursor"></span>
+        </div>
+
+        <div class="demo-bar">
+          <span class="demo-bar-label">Recent captures</span>
+          <span class="saved-badge" id="saved-badge">✓ Saved</span>
+        </div>
+
+        <div class="demo-entries" id="demo-entries">
+          <div class="demo-entry" id="entry-0">
+            <div class="entry-icon">📧</div>
+            <div class="entry-body">
+              <div class="entry-app">Mail.app</div>
+              <div class="entry-text">Hi Sarah, I wanted to follow up on our meeting yesterday about the Q2 roadmap...</div>
+            </div>
+            <div class="entry-time">3m ago</div>
+          </div>
+          <div class="demo-entry" id="entry-1">
+            <div class="entry-icon">🌐</div>
+            <div class="entry-body">
+              <div class="entry-app">Chrome · Forms</div>
+              <div class="entry-text">Thank you for your application. I am particularly excited about the opportunity...</div>
+            </div>
+            <div class="entry-time">18m ago</div>
+          </div>
+          <div class="demo-entry" id="entry-2">
+            <div class="entry-icon">💬</div>
+            <div class="entry-body">
+              <div class="entry-app">Slack · #team</div>
+              <div class="entry-text">Quick update: the deploy went smoothly. We hit 99.8% uptime this month and...</div>
+            </div>
+            <div class="entry-time">1h ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ STATS ══════════ -->
+  <div class="stats-bar reveal">
+    <div class="stat-item">
+      <div class="stat-value">0 bytes</div>
+      <div class="stat-label">Sent to cloud</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">AES-256</div>
+      <div class="stat-label">Encryption</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">&lt;1 MB</div>
+      <div class="stat-label">RAM usage</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">30 days</div>
+      <div class="stat-label">Auto-delete</div>
+    </div>
+  </div>
+
+  <!-- ══════════ FEATURES ══════════ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header reveal">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">Everything you need.<br />Nothing you don't.</h2>
+      </div>
+
+      <div class="features-grid reveal">
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <div class="feature-title">Privacy First</div>
+          <p class="feature-desc">All data is encrypted with AES-256-GCM via Apple's CryptoKit and stored exclusively on your Mac. No cloud. No accounts. No network access.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <div class="feature-title">Automatic Capture</div>
+          <p class="feature-desc">Runs silently in the background using macOS Accessibility API. Captures across every app—Notes, Mail, Slack, browsers, IDEs, and more.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">Instant Search</div>
+          <p class="feature-desc">Full-text search across your entire history. Find that email draft you closed, that form you lost, that message you accidentally deleted.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🪶</div>
+          <div class="feature-title">Featherlight</div>
+          <p class="feature-desc">Under 1 MB RAM. Near-zero CPU. Native SwiftUI + AppKit—no Electron, no web views. Built to disappear completely into the background.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ HOW IT WORKS ══════════ -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">How It Works</div>
+        <h2 class="section-title">Up and running<br />in 60 seconds.</h2>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num active">01</div>
+          <h3 class="step-title">Install &amp; Allow</h3>
+          <p class="step-desc">Download the app and grant Accessibility permissions in System Settings. One-time setup, takes about 30 seconds.</p>
+        </div>
+        <div class="step reveal reveal-delay-1">
+          <div class="step-num">02</div>
+          <h3 class="step-title">Type Normally</h3>
+          <p class="step-desc">Use your Mac exactly as you always do. TypeSave runs invisibly in the background—zero interruption to your workflow.</p>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <div class="step-num">03</div>
+          <h3 class="step-title">Recover Instantly</h3>
+          <p class="step-desc">Lost something? Click the menu bar icon, search your history, copy your text back. Done in seconds—not frustration.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ PRIVACY ══════════ -->
+  <section class="privacy" id="privacy">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Privacy</div>
+        <h2 class="section-title">Your words.<br />Your machine.<br />Full stop.</h2>
+      </div>
+
+      <div class="privacy-layout">
+        <div class="privacy-items">
+          <div class="privacy-item reveal">
+            <div class="privacy-item-icon">🔒</div>
+            <div>
+              <div class="privacy-item-title">AES-256-GCM Encryption</div>
+              <div class="privacy-item-desc">Every capture is encrypted via Apple's CryptoKit before being written to disk. The key never leaves your device—not even to us.</div>
+            </div>
+          </div>
+          <div class="privacy-item reveal reveal-delay-1">
+            <div class="privacy-item-icon">🚫</div>
+            <div>
+              <div class="privacy-item-title">Zero Network Access</div>
+              <div class="privacy-item-desc">No analytics, no telemetry, no cloud sync. TypeSave holds no network entitlements—verify it yourself in Little Snitch.</div>
+            </div>
+          </div>
+          <div class="privacy-item reveal reveal-delay-2">
+            <div class="privacy-item-icon">🗑️</div>
+            <div>
+              <div class="privacy-item-title">Auto-Delete After 30 Days</div>
+              <div class="privacy-item-desc">All data is permanently deleted after 30 days by default. Fully configurable. Your typing history doesn't outlast its usefulness.</div>
+            </div>
+          </div>
+          <div class="privacy-item reveal reveal-delay-3">
+            <div class="privacy-item-icon">📂</div>
+            <div>
+              <div class="privacy-item-title">Open Source &amp; Auditable</div>
+              <div class="privacy-item-desc">Every line of source code is public on GitHub under the MIT License. Audit it, fork it, build it yourself. No black boxes.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="privacy-panel reveal">
+          <span class="shield-icon">🛡️</span>
+          <div class="privacy-headline">Zero-Knowledge Architecture</div>
+          <p class="privacy-tagline">We can't read your data. Not because of policy—because of math.</p>
+          <div class="privacy-tags">
+            <span class="privacy-tag">local-only</span>
+            <span class="privacy-tag">aes-256-gcm</span>
+            <span class="privacy-tag">no-telemetry</span>
+            <span class="privacy-tag">open-source</span>
+            <span class="privacy-tag">mit-license</span>
+            <span class="privacy-tag">no-accounts</span>
+            <span class="privacy-tag">no-cloud</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ DOWNLOAD ══════════ -->
+  <section class="download-section" id="download">
+    <div class="download-inner">
+      <div class="section-label">Download</div>
+      <h2 class="section-title reveal">Start saving your<br />typing today.</h2>
+      <p class="download-sub reveal">Free, open source, and always will be.</p>
+      <div class="download-actions reveal">
+        <a href="https://github.com/matteoLeva/typesave/releases/latest" class="btn-primary">
+          ↓ Download for macOS
+        </a>
+        <a href="https://github.com/matteoLeva/typesave" class="btn-secondary">
+          View on GitHub ↗
+        </a>
+      </div>
+      <p class="sysreq reveal">
+        Requires macOS 13.0 Ventura or later<br />
+        Apple Silicon (M1+) and Intel · ~4 MB
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">TypeSave · MIT License</div>
+      <div class="footer-links">
+        <a href="https://github.com/matteoLeva/typesave" class="footer-link">GitHub</a>
+        <a href="https://github.com/matteoLeva/typesave/issues" class="footer-link">Issues</a>
+        <a href="https://github.com/matteoLeva/typesave/releases" class="footer-link">Releases</a>
+        <a href="https://github.com/matteoLeva/typesave/blob/main/LICENSE" class="footer-link">License</a>
+      </div>
+      <div class="footer-made">Made with ❤️ in Italy</div>
+    </div>
+  </footer>
+
+  <script>
+    // ─── Nav scroll effect ───
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // ─── Scroll reveal ───
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    // ─── Typing animation ───
+    const phrases = [
+      "Dear hiring manager, I am writing to express my enthusiastic interest in...",
+      "Quick note before I forget — the main insight from today's standup was that...",
+      "Meeting notes: Q1 review. Revenue up 23%, churn down to 2.1%. Key decisions...",
+      "Hi Sarah, following up on the proposal I sent last week. I wanted to clarify...",
+    ];
+
+    let pi = 0, ci = 0, deleting = false;
+    const typingEl  = document.getElementById('typing-text');
+    const savedBadge = document.getElementById('saved-badge');
+
+    function tick() {
+      const phrase = phrases[pi];
+      if (deleting) {
+        typingEl.textContent = phrase.slice(0, ci - 1);
+        ci--;
+        if (ci === 0) {
+          deleting = false;
+          pi = (pi + 1) % phrases.length;
+          savedBadge.classList.remove('show');
+          setTimeout(tick, 420);
+          return;
+        }
+        setTimeout(tick, 22);
+      } else {
+        typingEl.textContent = phrase.slice(0, ci + 1);
+        ci++;
+        if (ci === phrase.length) {
+          savedBadge.classList.add('show');
+          deleting = true;
+          setTimeout(tick, 2800);
+          return;
+        }
+        setTimeout(tick, 48 + Math.random() * 36);
+      }
+    }
+    setTimeout(tick, 900);
+
+    // ─── Demo entries staggered reveal ───
+    [0, 1, 2].forEach((i) => {
+      setTimeout(() => {
+        const el = document.getElementById('entry-' + i);
+        if (el) el.classList.add('show');
+      }, 900 + i * 350);
+    });
+  </script>
+</body>
+</html>
